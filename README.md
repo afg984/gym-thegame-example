@@ -17,7 +17,7 @@ go get -u github.com/afg984/thegame/server/go/thegame
 
 ## Configuration
 
-Update `bin=...` in gym_thegame.py with $GOPATH/bin/thegame
+Update `LockStepServer(bin=...)` in gym_thegame.py with the relative or absolute path for `$GOPATH/bin/thegame`
 
 ## Run
 
