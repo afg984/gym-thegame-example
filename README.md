@@ -32,3 +32,5 @@ Something like this
 ```
 python -m thegame.gui.spectator localhost:50051
 ```
+
+Replace localhost and 50051 with the correct address and port.
