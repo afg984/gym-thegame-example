@@ -60,6 +60,10 @@ def guess_server_path():
 
 
 class TheGameEnv(SinglePlayerEnv):
+    # Number of steps before thegame is reset.
+    # set it here to override the default value (16384).
+    # total_steps = 16384
+
     def __init__(self):
         super().__init__(
             bin=guess_server_path(),
