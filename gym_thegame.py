@@ -37,10 +37,32 @@ def get_skill_to_level(hero):
             return skill
 
 
+def guess_server_path():
+    """
+    tries to find `thegame` binary.
+
+    It first tires $PATH, then $GOPATH/bin/thegame
+    """
+    import os
+    import shutil
+    import subprocess
+    which = shutil.which('thegame')
+    if which is not None:
+        return which
+    try:
+        gopath = subprocess.check_output(['go', 'env', 'GOPATH'], universal_newlines=True).rstrip()
+    except FileNotFoundError:
+        gopath = os.path.expanduser('~/go')
+    server_path = os.path.join(gopath, 'bin', 'thegame')
+    if shutil.which(server_path) is None:
+        raise Exception("Cannot guess path to thegame's server")
+    return server_path
+
+
 class TheGameEnv(SinglePlayerEnv):
     def __init__(self):
         super().__init__(
-            bin='../../server/go/thegame/thegame',
+            bin=guess_server_path(),
             listen=':50051',  # listen on all addresses
             # listen='localhost:50051',  # listen on localhost only
         )
