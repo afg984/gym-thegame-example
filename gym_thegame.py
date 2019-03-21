@@ -61,11 +61,10 @@ class TheGameEnv(SinglePlayerEnv):
     # set it here to override the default value (16384).
     # total_steps = 16384
 
-    def __init__(self):
+    def __init__(self, listen='localhost:50051'):
         super().__init__(
             bin=guess_server_path(),
-            listen='localhost:50051',  # listen on localhost only
-            # listen=':50051',  # listen on all addresses
+            listen=listen,
         )
 
         self.observation_space = Box(low=-1, high=1, shape=(100, 9))
