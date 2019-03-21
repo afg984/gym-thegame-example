@@ -39,7 +39,11 @@ def get_skill_to_level(hero):
 
 class TheGameEnv(SinglePlayerEnv):
     def __init__(self):
-        super().__init__(bin='../../server/go/thegame/thegame', port=50051)
+        super().__init__(
+            bin='../../server/go/thegame/thegame',
+            listen=':50051',  # listen on all addresses
+            # listen='localhost:50051',  # listen on localhost only
+        )
 
         self.observation_space = Box(low=-1, high=1, shape=(100, 9))
         self.action_space = Box(low=-1, high=-1, shape=(4,))
