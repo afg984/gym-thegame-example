@@ -63,8 +63,8 @@ class TheGameEnv(SinglePlayerEnv):
     def __init__(self):
         super().__init__(
             bin=guess_server_path(),
-            listen=':50051',  # listen on all addresses
-            # listen='localhost:50051',  # listen on localhost only
+            listen='localhost:50051',  # listen on localhost only
+            # listen=':50051',  # listen on all addresses
         )
 
         self.observation_space = Box(low=-1, high=1, shape=(100, 9))
