@@ -45,18 +45,15 @@ def guess_server_path():
     """
     import os
     import shutil
-    import subprocess
     which = shutil.which('thegame')
     if which is not None:
         return which
-    try:
-        gopath = subprocess.check_output(['go', 'env', 'GOPATH'], universal_newlines=True).rstrip()
-    except FileNotFoundError:
-        gopath = os.path.expanduser('~/go')
-    server_path = os.path.join(gopath, 'bin', 'thegame')
-    if shutil.which(server_path) is None:
-        raise Exception("Cannot guess path to thegame's server")
-    return server_path
+    gopaths = os.environ.get('GOPATH', os.path.expanduser('~/go'))
+    for gopath in gopaths.split(os.pathsep):
+        server_path = os.path.join(gopath, 'bin', 'thegame')
+        if shutil.which(server_path) is not None:
+            return server_path
+    raise Exception("Cannot guess path to thegame's server")
 
 
 class TheGameEnv(SinglePlayerEnv):
