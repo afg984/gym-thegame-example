@@ -34,7 +34,7 @@ python -m baselines.run --extra_import gym_thegame --env=thegame-v0 --alg=ppo2 -
 Something like this
 
 ```
-python -m thegame.gui.spectator localhost:50051
+python -m thegame.gui.spectator localhost:50051 --smooth
 ```
 
 localhost:50051 is the default address. If you change it in `TheGameEnv`, you should spectate on
