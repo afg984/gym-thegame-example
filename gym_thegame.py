@@ -2,14 +2,11 @@ from enum import IntEnum
 import numpy as np
 import math
 from thegame import Ability
-import random
 
 from gym.envs.registration import register
 from gym.spaces import Box
 
-from thegame.api import LockStepServer, RawClient, GameState
-from thegame import thegame_pb2 as pb2
-from thegame.experimental.gymbase import BaseEnv
+from thegame.experimental.gymbase import SinglePlayerEnv, pb2, GameState
 
 
 class Attr(IntEnum):
@@ -40,12 +37,9 @@ def get_skill_to_level(hero):
             return skill
 
 
-class TheGameEnv(BaseEnv):
+class TheGameEnv(SinglePlayerEnv):
     def __init__(self):
-        port = random.randrange(50000, 60000)
-        # port = os.environ['PORT']
-        self.server = LockStepServer(f':{port}', bin='../../server/go/thegame/thegame')
-        self.client = RawClient(f'localhost:{port}', 'gym')
+        super().__init__(bin='../../server/go/thegame/thegame', port=50051)
 
         self.observation_space = Box(low=-1, high=1, shape=(100, 9))
         self.action_space = Box(low=-1, high=-1, shape=(4,))
