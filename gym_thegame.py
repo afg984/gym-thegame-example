@@ -6,7 +6,7 @@ from thegame import Ability
 from gym.envs.registration import register
 from gym.spaces import Box
 
-from thegame.experimental.gymbase import SinglePlayerEnv, pb2, GameState
+from thegame.experimental.gymbase import SinglePlayerEnv, GameState, Controls
 
 
 class Attr(IntEnum):
@@ -59,20 +59,36 @@ def guess_server_path():
 class TheGameEnv(SinglePlayerEnv):
     # Number of steps before thegame is reset.
     # set it here to override the default value (16384).
-    # total_steps = 16384
 
     def __init__(self, listen='localhost:50051'):
+        import random
+        listen = f'localhost:{random.randrange(50000, 60000)}'
         super().__init__(
-            bin=guess_server_path(),
+            server_bin=guess_server_path(),
             listen=listen,
+            total_steps=10000,
         )
 
-        self.observation_space = Box(low=-1, high=1, shape=(100, 9))
-        self.action_space = Box(low=-1, high=-1, shape=(4,))
+        state_ranges = [
+            (-800, 800),
+            (-800, 800),
+            (-14, 14),
+            (-14, 14),
+            (0, 5000),
+            (0, 60),
+            (0, 360),
+            (0, 1),
+            (0, 1),
+        ]
+        low_state = np.array([[x[0] for x in state_ranges]] * 100, dtype=np.float32)
+        high_state = np.array([[x[1] for x in state_ranges]] * 100, dtype=np.float32)
+
+        self.observation_space = Box(low=low_state, high=high_state)
+        self.action_space = Box(low=-1, high=1, shape=(4,), dtype=np.float32)
 
     def action_to_controls(self, action):
         level = get_skill_to_level(self.game_state.hero)
-        return pb2.Controls(
+        return Controls(
             level_up=[level],
             accelerate=True,
             acceleration_direction=math.atan2(action[1], action[0]),
@@ -84,21 +100,26 @@ class TheGameEnv(SinglePlayerEnv):
         obv = np.zeros(
             self.observation_space.shape, self.observation_space.dtype)
 
-        def setentity(i, ent):
+        def setentity(i, ent, type):
             xdiff = ent.position.x - gs.hero.position.x
             ydiff = ent.position.y - gs.hero.position.y
-            obv[i, Attr.pos_x] = xdiff / 800
-            obv[i, Attr.pos_y] = ydiff / 800
-            obv[i, Attr.vel_x] = ent.velocity.x / 40
-            obv[i, Attr.vel_y] = ent.velocity.y / 40
-            obv[i, Attr.health] = ent.health / 5000
-            obv[i, Attr.body_damage] = ent.body_damage / 60
-            obv[i, Attr.experience] = ent.rewarding_experience / 360
+            obv[i, Attr.pos_x] = xdiff
+            obv[i, Attr.pos_y] = ydiff
+            obv[i, Attr.vel_x] = ent.velocity.x
+            obv[i, Attr.vel_y] = ent.velocity.y
+            obv[i, Attr.health] = ent.health
+            obv[i, Attr.body_damage] = ent.body_damage
+            obv[i, Attr.experience] = ent.rewarding_experience
+            obv[i, type] = 1
 
-        for i, polygon in enumerate(gs.polygons):
-            setentity(i, polygon)
-        for i, bullet in enumerate(gs.bullets):
-            setentity(i, bullet)
+        setentity(0, gs.hero, 0)
+        i = 1
+        for i, polygon in enumerate(gs.polygons, 1):
+            if i == 100: break
+            setentity(i, polygon, Attr.is_polygon)
+        for i, bullet in enumerate(gs.bullets, i):
+            if i == 100: break
+            setentity(i, bullet, Attr.is_bullet)
         return obv
 
     def get_reward(self, prev, curr):
